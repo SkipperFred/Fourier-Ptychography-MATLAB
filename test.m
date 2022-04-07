@@ -96,10 +96,8 @@ T = opts.T;
 aberration = opts.aberration;
 
 %% k-space parameterization
-%[m1, n1, numim] = size(imseqlow);
-m1 = 1520;
-n1 = 1520;
-numim= 64;
+[m1, n1, numim] = size(imseqlow);
+
 pratio = round(spsize/psize); % upsampling ratio
 m = pratio*m1; n = pratio*n1;
 k0 = 2*pi/wlength;
@@ -144,6 +142,7 @@ for i = 1:2 % 2 initial iterations to get a rough estimate of high-res image
         O_j=himFT(kyl:kyh,kxl:kxh);
         lowFT=O_j.*fmaskpro;
         im_lowFT=ifft2(ifftshift(lowFT));
+        imshow(abs(im_lowFT));
         updatetemp=pratio^2.*imseqlow(:,:,i3);
         im_lowFT=updatetemp.*exp(1j.*angle(im_lowFT)); 
         lowFT_p=fftshift(fft2(im_lowFT));
@@ -181,6 +180,7 @@ for i = 1:loopnum
     
         updatetemp=pratio^2.*imseqlow(:,:,i3);
         im_lowFT=updatetemp.*exp(1j.*angle(im_lowFT)); 
+        imshow(abs(im_lowFT));
         lowFT_p=fftshift(fft2(im_lowFT));
     
         himFT(kyl:kyh,kxl:kxh)=himFT(kyl:kyh,kxl:kxh)+...

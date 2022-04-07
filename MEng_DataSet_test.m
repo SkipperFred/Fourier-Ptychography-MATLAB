@@ -2,15 +2,16 @@ close all;clear;clc;
 
 %% Prepare the experimental data
 % Add necessary folders into the current working directory
-location = 'C:\Users\freds\Desktop\Fourier Ptychography MATLAB\Data\ExperimentDataset\*.png';
+location = 'C:\Users\freds\Desktop\Fourier Ptychography MATLAB\Data\ExperimentDataset\USAF 0604\*.png';
 srcFiles = dir(location);
-imageStore= zeros(760,760,64);
+imageStore= zeros(3040,4056,1);
 
-for i = 1:length(srcFiles)
+for i = 1:1
     baseFileName = srcFiles(i).name;
     fullFileName = fullfile(srcFiles(i).folder, baseFileName);
     imageArray = imread(fullFileName);
-    imageStore(:,:,i) = imageArray(1140:1900-1,1648:2408-1,2);
+    %imageStore(:,:,i) = imageArray(1140:1900-1,1648:2408-1,2);
+    imageStore(:,:,i) = imageArray(:,:,2);
 end
 
 imlow_HDR(:,:,:) = imageStore(:,:,:);
@@ -40,15 +41,15 @@ yint = -1.7;
 xstart = 18; ystart = 20; % absolute coordinate of initial LED
 arraysize = 8; % side length of lit LED array
 [xlocation, ylocation] = LED_location(xstart, ystart, arraysize);
-H      = 370; % distance between LEDs and sample, in mm
-LEDp   = 4;     % distance between adjacent LEDs, in mm
+H      = 42; % distance between LEDs and sample, in mm
+LEDp   = 1.7;     % distance between adjacent LEDs, in mm
 nglass = 1.52;  % refraction index of glass substrate
 t      = 0;     % glass thickness, in mm
 [kx, ky, NAt] = k_vectorTest(xlocation-xstart, ylocation-ystart, H, LEDp, nglass, t, theta, xint, yint, arraysize^2);
 
 %% Reconstruct by FP algorithm
 NA          = 0.24;      % objective NA
-spsize      = 7.4e-6; % pixel size of low-res image on sample plane, in m
+spsize      = 2.465e-6; % pixel size of low-res image on sample plane, in m #7.4e-6
 upsmp_ratio = 4;        % upsampling ratio
 psize       = spsize/upsmp_ratio; % pixel size of high-res image on sample plane, in m
 
@@ -62,7 +63,7 @@ opts.eta_p      = 0.2;  % the step size for adding momentum to pupil updating
 opts.T          = 1;    % do momentum every T images. '0' for no momentum during the recovery; integer, generally (0, arraysize^2].
 opts.aberration = 0; % pre-calibrated aberration, if available
 
-used_idx = 1:1:arraysize^2; % choose which raw image is used, for example, 1:2:arraysize^2 means do FPM recovery with No1 image, No3 image, No5 image......
+used_idx = 1:1:1; % choose which raw image is used, for example, 1:2:arraysize^2 means do FPM recovery with No1 image, No3 image, No5 image......
 imlow_used = imlow_HDR(:,:,used_idx);
 kx_used = kx(used_idx);
 ky_used = ky(used_idx);
@@ -139,6 +140,8 @@ else
     fmaskproPT3 = exp(pi*1j.*zn);
     fmaskpro = fmaskproPT1.*fmaskproPT2.*fmaskproPT3;
     fmaskTest = fmaskpro;
+    figure;
+    imshow(fmaskTest);
 end
 %% initialization
 him = imresize(sum(imseqlow,3),[m,n]);
@@ -206,7 +209,8 @@ for i = 1:loopnum
             fmaskpro = PT + vp;
             vp0 = vp;
             PT = fmaskpro;
-
+            figure;
+            imshow(fmaskpro);
             countimg = 0;
         end
         

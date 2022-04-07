@@ -3,15 +3,16 @@ close all;clear;clc;
 %% Prepare the experimental data
 % Add necessary folders into the current working directory
 % Load data file
-location = 'C:\Users\freds\Desktop\Fourier Ptychography MATLAB\Data\ExperimentDataset\*.png';
+location = 'C:\Users\freds\Desktop\Fourier Ptychography MATLAB\Data\ExperimentDataset\USAF 0604\*.png';
 srcFiles = dir(location);
-imageStore= zeros(760,760,64);
+imageStore= zeros(3040,4056,64);
 
 for i = 1:length(srcFiles)
     baseFileName = srcFiles(i).name;
     fullFileName = fullfile(srcFiles(i).folder, baseFileName);
     imageArray = imread(fullFileName);
-    imageStore(:,:,i) = imageArray(1140:1900-1,1648:2408-1,2);
+%    imageStore(:,:,i) = imageArray(1140:1900-1,1648:2408-1,2);
+    imageStore(:,:,i) = imageArray(:,:,2);
 end
 
 imlow_HDR(:,:,:) = imageStore(:,:,:);
@@ -39,18 +40,18 @@ elseif strcmp(is_show,'all')
 end
 
 %% Set up the experiment parameters
-xstart = 18; ystart = 20; % absolute coordinate of initial LED
+xstart = 8; ystart = 8; % absolute coordinate of initial LED
 arraysize = 8; % side length of lit LED array
 [xlocation, ylocation] = LED_location(xstart, ystart, arraysize);
-H      = 90.88; % distance between LEDs and sample, in mm
-LEDp   = 3.4;     % distance between adjacent LEDs, in mm
+H      = 60; % distance between LEDs and sample, in mm
+LEDp   = 3.4*0.75;     % distance between adjacent LEDs, in mm
 nglass = 1.52;  % refraction index of glass substrate
-t      = 1;     % glass thickness, in mm
+t      = 0;     % glass thickness, in mm
 [kx, ky, NAt] = k_vector(xlocation-xstart, ylocation-ystart, H, LEDp, nglass, t, theta, xint, yint, arraysize^2);
 
 %% Reconstruct by FP algorithm
-NA          = 0.1;      % objective NA
-spsize      = 1.845e-6; % pixel size of low-res image on sample plane, in m
+NA          = 0.39;      % objective NA
+spsize      = 1.462e-6; % pixel size of low-res image on sample plane, in m
 upsmp_ratio = 4;        % upsampling ratio
 psize       = spsize/upsmp_ratio; % pixel size of high-res image on sample plane, in m
 
